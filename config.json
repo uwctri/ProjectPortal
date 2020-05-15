@@ -1,0 +1,131 @@
+{
+    "name": "CTRI Portal",
+    "description": "Open an iframe modal to another REDCap page or anywhere else.",
+    "namespace": "UWMadison\\CTRIportal",
+    "authors": [
+        {
+            "name": "Adam Nunez",
+            "email": "Adam.Nunez@ctri.wisc.edu",
+            "institution": "UW Madison - Center for Tobacco Research and Intervention "
+        },
+        {
+            "name": "Todd Hayes-Birchler",
+            "email": "hayesbirchle@ctri.wisc.edu",
+            "institution": "UW Madison - Center for Tobacco Research and Intervention "
+        }
+    ],
+    "permissions": [
+        "redcap_data_entry_form",
+        "redcap_data_entry_form_top",
+        "redcap_every_page_top"
+    ],
+    "project-settings": [
+        {
+            "key": "current-pid",
+            "name": "Settings were set in this project",
+            "type": "text"
+        },
+        {
+            "key": "background-scroll",
+            "name": "<b>Allow background scroll with open modal</b>",
+            "type": "checkbox"
+        },
+        {
+            "key": "portal-buttons",
+            "name": "<b>Portal</b>",
+            "type": "sub_settings",
+            "repeatable":true,
+            "sub_settings":[
+                {
+                    "key": "name",
+                    "name": "<b>Unique modal name</b><br>Used as a the class name on your link and as the id on the modal",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "isredcap",
+                    "name": "<b>Is the desitination a REDCap URL?</b>",
+                    "type": "radio",
+                    "choices": [
+                        {
+                            "value": "1",
+                            "name": "Yes"
+                        },
+                        {
+                            "value": "0",
+                            "name": "No"
+                        }
+                    ]
+                },
+                {
+                    "key": "isrepeating",
+                    "name": "<b>New repeating instrument?</b><br>Is the desitination a new instance of a repeating instrument?",
+                    "type": "radio",
+                    "choices": [
+                        {
+                            "value": "1",
+                            "name": "Yes"
+                        },
+                        {
+                            "value": "0",
+                            "name": "No"
+                        }
+                    ]
+                },
+                {
+                    "key": "destination",
+                    "name": "<b>Destination URL</b>",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "key": "redcap-hide",
+                    "name": "<b>Hide elements on destination page</b>",
+                    "type": "radio",
+                    "choices": [
+                        {
+                            "value": "all",
+                            "name": "Everything but the REDCap form"
+                        },
+                        {
+                            "value": "nav",
+                            "name": "Hide nav bars only"
+                        },
+                        {
+                            "value": "none",
+                            "name": "Don't hide anything"
+                        }
+                    ] 
+                },
+                {
+                    "key": "inmodal",
+                    "name": "<b>Open link in a modal?</b>",
+                    "type": "radio",
+                    "choices": [
+                        {
+                            "value": "1",
+                            "name": "Yes"
+                        },
+                        {
+                            "value": "0",
+                            "name": "No"
+                        }
+                    ]
+                },
+                {
+                    "key": "modal-height",
+                    "name": "<b>Modal height</b><br>As percent (default of 90%) or px (600px)",
+                    "type": "text"
+                },
+                {
+                    "key": "modal-width",
+                    "name": "<b>Max modal width</b><br>As percent (90%) or px (default of 800px)",
+                    "type": "text"
+                }
+            ]
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "9.8.0"
+    }
+}
