@@ -35,8 +35,8 @@ $(document).ready(function() {
                         `<span style="float:right" id="isRepeating___${a}">&instance=[new-instance]</span><br>
                         ${CTRIportal.helperButtons}<br>
                         <span>Additional Pipes: Get a YMD formatted date with N offset using [today+N] and [today-N]</span><br>
-                        <span style="margin:104px"> Event IDs can be piped via [eventname_arm_1] or [event-id] for the current event </span><br>
-                        <span style="margin:104px"> The current URL can be piped via [current-url] </span>`
+                        <span style="margin-left:104px"> Event IDs can be piped via [eventname_arm_1] or [event-id] for the current event </span><br>
+                        <span style="margin-left:104px"> The current URL can be piped via [current-url] </span>`
                     );
                     $(this).find('input').addClass("mt-1");
                 }
@@ -62,7 +62,7 @@ $(document).ready(function() {
                 }
             });
             
-            // Hide values for redcap specific stuff
+            // Hide repeating instrument span
             $("input[name^=isrepeating_]").on('click', function() {
                 let a = $(this).prop('name').split('____')[1];
                 if ( $(this).val() == "1" ) {
@@ -79,10 +79,15 @@ $(document).ready(function() {
                 if ( $(this).val() == "1" ) {
                     $(`input[name=modal-height____${a}]`).closest('tr').show();
                     $(`input[name=modal-width____${a}]`).closest('tr').show();
+                    $(`input[name=hide-close-button____${a}]`).closest('tr').show();
+                    if ( $(`input[name=isredcap____${a}]:checked`).val() == "1" )
+                        $(`input[name=redcap-hide____${a}]`).closest('tr').show();
                 }
                 else {
                     $(`input[name=modal-height____${a}]`).closest('tr').hide();
                     $(`input[name=modal-width____${a}]`).closest('tr').hide();
+                    $(`input[name=redcap-hide____${a}]`).closest('tr').hide();
+                    $(`input[name=hide-close-button____${a}]`).closest('tr').hide();
                 }
             });
             

@@ -43,6 +43,21 @@
                     "required": true
                 },
                 {
+                    "key": "inmodal",
+                    "name": "<b>Open link in a modal?</b>",
+                    "type": "radio",
+                    "choices": [
+                        {
+                            "value": "1",
+                            "name": "Yes"
+                        },
+                        {
+                            "value": "0",
+                            "name": "No"
+                        }
+                    ]
+                },
+                {
                     "key": "isredcap",
                     "name": "<b>Is the desitination a REDCap URL?</b>",
                     "type": "radio",
@@ -98,19 +113,9 @@
                     ] 
                 },
                 {
-                    "key": "inmodal",
-                    "name": "<b>Open link in a modal?</b>",
-                    "type": "radio",
-                    "choices": [
-                        {
-                            "value": "1",
-                            "name": "Yes"
-                        },
-                        {
-                            "value": "0",
-                            "name": "No"
-                        }
-                    ]
+                    "key": "hide-close-button",
+                    "name": "<b>Hide Close Button</b><br>Hides the bottom-right close button",
+                    "type": "checkbox"
                 },
                 {
                     "key": "modal-height",

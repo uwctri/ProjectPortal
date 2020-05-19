@@ -99,7 +99,8 @@ class CTRIportal extends AbstractExternalModule {
                 'width' => $settings['modal-width']['value'][$index],
                 'height' => $settings['modal-height']['value'][$index],
                 'modal' => $settings['inmodal']['value'][$index] == "1",
-                'hide' => $settings['redcap-hide']['value'][$index]
+                'hide' => $settings['redcap-hide']['value'][$index],
+                'hideClose' => $settings['hide-close-button']['value'][$index]
             ];
         }
         return $load;

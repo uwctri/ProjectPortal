@@ -82,6 +82,8 @@ function loadPortals() {
         }
         
         $("#ctriPortal-tr td").append(CTRIportal.html.modal.replace('modalID', name));
+        if ( info.hideClose )
+            $(`#${name} .btn-danger`).hide();
         $(`#${name}`).modal({
             show: false,
             backdrop: 'static'
