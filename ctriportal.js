@@ -133,7 +133,17 @@ function loadPortals() {
                 let content = $(`#${name} iframe`).contents();
                 
                 // Check for required feilds
-                if ( $(content).find('*[req]:visible').not('*[hasval]') ) {
+                let reqFieldMissing = false;
+                $(content).find('*[req]:visible').each(function() {
+                    if ( reqFieldMissing )
+                        return false;
+                    let $input = $(this).find('select,input');
+                    if ( $input.length == 1 ) // Select or any input 
+                        reqFieldMissing = $input.val() == "";
+                    else // checkbox
+                        reqFieldMissing = $input.not('*[id]').get().map(x=>x.value).every(x=>!x);
+                });
+                if ( reqFieldMissing ) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Missing Required Fields',
