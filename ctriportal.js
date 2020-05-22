@@ -64,6 +64,7 @@ function loadPortals() {
     if ( CTRIportal.loaded )
         return;
     CTRIportal.loaded = true;
+    
     $.each( CTRIportal.config, function(name, info) {
         if ( $(`.${name}`).length == 0 )
             return;
@@ -88,6 +89,8 @@ function loadPortals() {
             show: false,
             backdrop: 'static'
         });
+        
+        
         $(`.${name}`).on('click', function() {
             $(`#${name}`).modal('show');
         });
@@ -104,6 +107,10 @@ function loadPortals() {
             if ( $(this).find('iframe').length != 0)
                 return;
             
+            $(this).find('.refresh').on('click', function() {
+                $(`#${name} iframe`).get(0).contentWindow.location.reload();
+            });
+            
             $(this).find('.modal-body').append(CTRIportal.html.iframe.replace('LINK',info.url));
                        
             $(this).find('iframe').on('load', function() {
@@ -111,43 +118,53 @@ function loadPortals() {
                 if ($(content).find("#header").text() == "Server Error")
                     return;
                 if (info.hide == 'all') {
-                    $(content).find('body > :not(form)').not('.ui-dialog').hide();
-                    $(content).find('form').appendTo($(content).find('body'));
+                    $(content).find('body > :not(#form)').not('.ui-dialog').hide();
+                    $(content).find('#form').appendTo($(content).find('body'));
                     $(content).find('tr[id$=__-tr]').hide();
                 } else if (info.hide == 'nav') {
                      $(content).find("#west, #south, #subheader, #fade").remove();
                 }
-                
-                if( ($(content).find('#field_validation_error_state').length!=0 && 
-                     $(content).find('#field_validation_error_state').val()!="0") || 
-                    $(content).find("#dq_rules_violated").length != 0 ||
-                    ($(content).find("#reqPopup").length != 0 && $(content).find("#reqPopup").is(':data(dialog)'))) {
-                    Swal.fire({
-                      icon: 'info',
-                      title: 'Issue saving form!',
-                      text: 'Please re-open the modal and address any issues.',
-                    });
-                }
-                
                 $(`#${name} .iframeLoading`).hide();
                 $(this).show();
+                enableRedcapSaveButtons();
             });
             
             $(this).find('.saveButton').on('click', function() {
-                $(`#${name}`).modal('hide');
                 let content = $(`#${name} iframe`).contents();
+                
+                // Check for required feilds
+                if ( $(content).find('*[req]:visible').not('*[hasval]') ) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Missing Required Fields',
+                        text: 'You did not provide a value for some fields that require a value. Please enter a value for the fields marked as required on this page.',
+                    });   
+                    return;
+                }
+                
+                disableRedcapSaveButtons();
+                $(`#${name}`).modal('hide');
                 if ( $(content).find("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').length != 0 ) {
                     $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click()
                 } else {
                     $(content).find("#submit-btn-savecontinue").click();
                 }
             });
-            
-            $(this).find('.refresh').on('click', function() {
-                $(`#${name} iframe`).get(0).contentWindow.location.reload();
-            });
         });
     });
+}
+
+function enableRedcapSaveButtons() {
+    $("#__SUBMITBUTTONS__-tr button").css('pointer-events', '');
+    $(".modalTempDisableSave").last().remove();
+}
+
+function disableRedcapSaveButtons() {
+    $("#__SUBMITBUTTONS__-tr button").css('pointer-events', 'none');
+    if ( $(".modalTempDisableSave").length > 0 )
+        $("#questiontable").after(`<div class='modalTempDisableSave d-none'></div>`)
+    else
+        $("#__SUBMITBUTTONS__-tr .btn-group").after(`<span class='text-bold text-danger modalTempDisableSave'><br>* Form saving disabled while modal is saved</span>`)
 }
 
 function customPipes( input ) {
