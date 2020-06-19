@@ -137,8 +137,8 @@ function loadPortals() {
                 $(content).find('*[req]:visible').each(function() {
                     if ( reqFieldMissing )
                         return false;
-                    let $input = $(this).find('select,input');
-                    if ( $input.length == 1 ) // Select or any input 
+                    let $input = $(this).find('select,input,textarea');
+                    if ( $input.length == 1 ) // Select, input, or textarea 
                         reqFieldMissing = $input.val() == "";
                     else // checkbox
                         reqFieldMissing = $input.not('*[id]').get().map(x=>x.value).every(x=>!x);
