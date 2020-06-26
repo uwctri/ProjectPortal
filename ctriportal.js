@@ -174,7 +174,8 @@ function disableRedcapSaveButtons() {
     if ( $(".modalTempDisableSave").length > 0 )
         $("#questiontable").after(`<div class='modalTempDisableSave d-none'></div>`)
     else
-        $("#__SUBMITBUTTONS__-tr .btn-group").after(`<span class='text-bold text-danger modalTempDisableSave'><br>* Form saving disabled while modal is saved</span>`)
+        $("#__SUBMITBUTTONS__-tr button").last().after(`<span class='text-bold text-danger modalTempDisableSave'><br>* Form saving disabled while modal is saved</span>`)
+    setTimeout(enableRedcapSaveButtons, 3000);
 }
 
 function customPipes( input ) {
