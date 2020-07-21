@@ -72,9 +72,7 @@ function loadPortals() {
         info.url = customPipes( info.url );
         
         if ( !info.modal ) {
-            $(`.${name}`).on('click', function() {
-                window.location.href = info.url;
-            });
+            $(`.${name}`).attr('href', info.url);
             return;
         }
         
