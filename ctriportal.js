@@ -119,6 +119,7 @@ function loadPortals() {
                     $(content).find('body > :not(#form)').not('.ui-dialog').hide();
                     $(content).find('#form').appendTo($(content).find('body'));
                     $(content).find('tr[id$=__-tr]').hide();
+                    $(content).find('html').css('overflow-x','hidden');
                 } else if (info.hide == 'nav') {
                      $(content).find("#west, #south, #subheader, #fade").remove();
                 }
