@@ -65,9 +65,17 @@ function loadPortals() {
         return;
     CTRIportal.loaded = true;
     
+    // Prevent google chrome bug with hidden forms
+    $(window).bind('beforeunload', function(){
+        if($('.modal').is(':visible') === false)
+            $( ".modal" ).remove();
+    });
+    
     $.each( CTRIportal.config, function(name, info) {
         if ( $(`.${name}`).length == 0 )
             return;
+        
+        $(`.${name}`).off(); // Remove all Redcap events
         
         info.url = customPipes( info.url );
         
@@ -77,7 +85,7 @@ function loadPortals() {
         }
         
         if ( CTRIportal.insideModal ) {
-            //Not doing anything right now. 
+            require_change_reason = 0; // Stop that pop-up from happening
         }
         
         $("#ctriPortal-tr td").append(CTRIportal.html.modal.replace('modalID', name));
@@ -154,7 +162,7 @@ function loadPortals() {
                 disableRedcapSaveButtons();
                 $(`#${name}`).modal('hide');
                 if ( $(content).find("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').length != 0 ) {
-                    $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click()
+                    $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click();
                 } else {
                     $(content).find("#submit-btn-savecontinue").click();
                 }
