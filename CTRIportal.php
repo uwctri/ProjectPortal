@@ -8,13 +8,7 @@ use Piping;
 use RCView;
 
 function printToScreen($string) {
-?>
-    <script type='text/javascript'>
-       $(function() {
-          console.log(<?=json_encode($string); ?>);
-       });
-    </script>
-    <?php
+    ?><script>console.log(<?=json_encode($string); ?>);</script><?php
 }
 
 class CTRIportal extends AbstractExternalModule {
@@ -28,16 +22,16 @@ class CTRIportal extends AbstractExternalModule {
     }
     
     public function redcap_every_page_top($project_id) {
-        $this->initCTRIglobal();
-        
         // Custom Config page
         if (strpos(PAGE, 'ExternalModules/manager/project.php') !== false && $project_id != NULL) {
+            $this->initCTRIglobal();
             $this->passArgument('helperButtons', $this->getPipingHelperButtons());
             $this->includeJs('config.js');
         }
     }
         
     public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance) {
+        $this->initCTRIglobal();
         $config = $this->parseConfiguration( $this->getProjectSettings(), [
             'project' => $project_id,
             'record' => $record,
@@ -57,7 +51,7 @@ class CTRIportal extends AbstractExternalModule {
         );
         echo "<script>var ".$this->module_global." = ".json_encode($data).";</script>";
     }
-
+    
     private function passArgument($name, $value) {
         echo "<script>".$this->module_global.".".$name." = ".json_encode($value).";</script>";
     }
@@ -73,6 +67,7 @@ class CTRIportal extends AbstractExternalModule {
                 continue;
             }
             $url = $settings['destination']['value'][$index];
+            $url = str_replace( '[event-id]', $_GET['event_id'], $url );
             $hide = null;
             if ( $settings['isredcap']['value'][$index] == "1" ) {
                 if ( Piping::containsSpecialTags( $url ) ) {
@@ -98,7 +93,7 @@ class CTRIportal extends AbstractExternalModule {
                 'url' => $url,
                 'width' => $settings['modal-width']['value'][$index],
                 'height' => $settings['modal-height']['value'][$index],
-                'modal' => $settings['inmodal']['value'][$index] == "1",
+                'modal' => $settings['inmodal']['value'][$index] == 1,
                 'hide' => $settings['redcap-hide']['value'][$index],
                 'hideClose' => $settings['hide-close-button']['value'][$index]
             ];

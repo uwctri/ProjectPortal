@@ -1,11 +1,14 @@
 CTRIportal.html = {};
 
 CTRIportal.html.modal = `
-<div id="modalID" class="modal" tabindex="-1" role="dialog">
+<div id="modalID" class="modal pr-0" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close refresh" style="font-size:1.4rem">
+                <button type="button" class="close fullscreen" style="font-size:1.3rem" data-toggle="false">
+                    <span>&#x26F6;</span>
+                </button>
+                <button type="button" class="close refresh ml-0" style="font-size:1.3rem">
                     <span>&#8635;</span>
                 </button>
                 <button type="button" class="close ml-0" data-dismiss="modal">
@@ -81,11 +84,14 @@ function loadPortals() {
         
         if ( !info.modal ) {
             $(`.${name}`).attr('href', info.url);
+            $(`.${name}`).on('click', function() {
+                window.location = $(this).attr('href');
+            });
             return;
         }
         
-        if ( CTRIportal.insideModal ) {
-            require_change_reason = 0; // Stop that pop-up from happening
+        if ( CTRIportal.insideModal ) { // Stop that pop-up from happening
+            require_change_reason = 0;  // but doesn't solve saving issue
         }
         
         $("#ctriPortal-tr td").append(CTRIportal.html.modal.replace('modalID', name));
@@ -107,14 +113,35 @@ function loadPortals() {
         });
         
         $(`#${name}`).on('show.bs.modal', function() {
-            $(this).find('.modal-content').css('min-height', parseCSSportalSetting(info.height,'h'));
             $(this).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w'));
-
+            $(window).on('resize', function(){
+                let t = $(`#${name} .fullscreen`).data('toggle');
+                let h = t ? window.innerHeight : parseCSSportalSetting(info.height,'h');
+                $(`#${name} .modal-dialog`).css('margin-top', t ? 0 : '1.75rem');
+                $(`#${name} .modal-dialog`).css('margin-bottom', t ? 0 : '1.75rem');
+                $(`#${name} .modal-content`).css('height', h);
+            });
+            $(window).resize();
+            
             if ( $(this).find('iframe').length != 0)
                 return;
             
             $(this).find('.refresh').on('click', function() {
                 $(`#${name} iframe`).get(0).contentWindow.location.reload();
+            });
+            
+            $(this).find('.fullscreen').on('click', function() {
+                let t = $(`#${name} .fullscreen`).data('toggle');
+                $(`#${name} .fullscreen`).data('toggle', !t);
+                if ( t ) {
+                    CTRIportal.width = $(`#${name} .modal-dialog`).width()
+                    if ( info.hide != 'all' )//Only change width if we aren't showing a normal form
+                        $(`#${name} .modal-dialog`).css('max-width', window.innerWidth);
+                } else {
+                    $(`#${name} .modal-dialog`).css('max-width', parseCSSportalSetting(info.width,'w'));
+                }
+                $(`#${name} .modal-dialog`).css('width', t ? 'auto' : CTRIportal.width);
+                $(window).resize();
             });
             
             $(this).find('.modal-body').append(CTRIportal.html.iframe.replace('LINK',info.url));
@@ -192,7 +219,6 @@ function customPipes( input ) {
         input = input.replace(/\[(today){1}([+-][1-9])+\]/g,getOffsetDate(val))
     }
     input = input.replace("[current-url]",encodeURIComponent(window.location.href));
-    input = input.replace("[event-id]",getParameterByName("event_id")); //Redcap JS function
     return input;
 }
 
@@ -211,7 +237,7 @@ function parseCSSportalSetting( setting, hw ) {
 function getOffsetDate( offset ) {
     let d = new Date();
     d.setDate(d.getDate() + offset);
-    return `${d.getFullYear()}-${padDigitLen2(d.getMonth()+1)}-${padDigitLen2(d.getDate())}`;
+    return formatDate(d, 'y-MM-dd');
 }
 
 function padDigitLen2(number) {
