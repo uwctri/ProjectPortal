@@ -49,7 +49,6 @@ $(document).ready(function() {
                 let a = $(this).prop('name').split('____')[1];
                 if ( $(this).val() == "1" ) {
                     $(`input[name=isrepeating____${a}]`).closest('tr').show();
-                    $(`input[name=redcap-hide____${a}]`).closest('tr').show();
                     $(`#isRedcap___${a}`).show();
                     if ( $(`input[name=isrepeating____${a}]:checked`).val() == "1" )
                         $(`#isRepeating___${a}`).show();
@@ -80,6 +79,7 @@ $(document).ready(function() {
                     $(`input[name=modal-height____${a}]`).closest('tr').show();
                     $(`input[name=modal-width____${a}]`).closest('tr').show();
                     $(`input[name=hide-close-button____${a}]`).closest('tr').show();
+                    $(`input[name=redcap-hide____${a}]`).closest('tr').hide();
                     if ( $(`input[name=isredcap____${a}]:checked`).val() == "1" )
                         $(`input[name=redcap-hide____${a}]`).closest('tr').show();
                 }
