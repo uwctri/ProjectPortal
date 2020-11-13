@@ -38,6 +38,19 @@ CTRIportal.html.iframe = `
     <iframe style="display:none;width:100%;border:none" src="LINK"></iframe>
 `;
 
+Date.prototype.addDays = function (days) {
+    return new Date( this.setDate(this.getDate() + days) );
+}
+
+Date.prototype.addWorkDays = function (days) {
+    return new Date( this.setDate(this.getDate() + days + (this.getDay() === 6 ? 2 : +!this.getDay()) +
+        (Math.floor((days - 1 + (this.getDay() % 6 || 1)) / 5) * 2)) );
+}
+
+Date.prototype.ymd = function() {
+    return formatDate(this, 'y-MM-dd');
+}
+
 $(document).ready(function () {
     $('form tr').last().after(CTRIportal.html.tr);
     if ( CTRIportal.wrongProject ) {
@@ -215,8 +228,14 @@ function disableRedcapSaveButtons() {
 function customPipes( input ) {
     let val;
     if ( input.includes("[today") ) {
-        val = parseInt(input.match(/(?:today){1}([+-][1-9])+/g)[0].split("today")[1]); // ?: isn't non-capture?
-        input = input.replace(/\[(today){1}([+-][1-9])+\]/g,getOffsetDate(val))
+        val = input.match(/(?:today){1}([+-]([1-9]*))+/g);
+        val = parseInt((val?val:["today+0"])[0].split("today")[1]); // ?: isn't non-capture?
+        input = input.replace(/\[(today){1}([+-][1-9])+\]/g,(new Date()).addDays(val).ymd())
+    }
+    if ( input.includes("[work") ) {
+        val = input.match(/(?:work){1}([+-]([1-9]*))+/g);
+        val = parseInt((val?val:["work+0"])[0].split("work")[1]);
+        input = input.replace(/\[(work){1}([+-][1-9])+\]/g,(new Date()).addWorkDays(val).ymd())
     }
     input = input.replace("[current-url]",encodeURIComponent(window.location.href));
     return input;
@@ -232,14 +251,4 @@ function parseCSSportalSetting( setting, hw ) {
     if ( setting.includes('%') && hw=='w' )
         return window.innerWidth* (parseInt(setting.replace('%',''))/100);
     return setting;
-}
-
-function getOffsetDate( offset ) {
-    let d = new Date();
-    d.setDate(d.getDate() + offset);
-    return formatDate(d, 'y-MM-dd');
-}
-
-function padDigitLen2(number) {
-    return ('0'+number).substr(-2);
 }

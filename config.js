@@ -35,6 +35,7 @@ $(document).ready(function() {
                         `<span style="float:right" id="isRepeating___${a}">&instance=[new-instance]</span><br>
                         ${CTRIportal.helperButtons}<br>
                         <span>Additional Pipes: Get a YMD formatted date with N offset using [today+N] and [today-N]</span><br>
+                        <span style="margin-left:104px"> Get a YMD date with N working days offset using [work+N] </span><br>
                         <span style="margin-left:104px"> Event IDs can be piped via [eventname_arm_1] or [event-id] for the current event </span><br>
                         <span style="margin-left:104px"> The current URL can be piped via [current-url] </span>`
                     );
