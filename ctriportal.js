@@ -51,6 +51,10 @@ Date.prototype.ymd = function() {
     return formatDate(this, 'y-MM-dd');
 }
 
+$.fn.isFrameScrollable = function () {
+    return $(this).find('iframe').contents().height() > ($(this).find('iframe').height()+1);
+};
+
 $(document).ready(function () {
     $('form tr').last().after(CTRIportal.html.tr);
     if ( CTRIportal.wrongProject ) {
@@ -126,7 +130,7 @@ function loadPortals() {
         });
         
         $(`#${name}`).on('show.bs.modal', function() {
-            $(this).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w'));
+            $(this).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w',$(this).isFrameScrollable()));
             $(window).on('resize', function(){
                 let t = $(`#${name} .fullscreen`).data('toggle');
                 let h = t ? window.innerHeight : parseCSSportalSetting(info.height,'h');
@@ -151,7 +155,7 @@ function loadPortals() {
                     if ( info.hide != 'all' )//Only change width if we aren't showing a normal form
                         $(`#${name} .modal-dialog`).css('max-width', window.innerWidth);
                 } else {
-                    $(`#${name} .modal-dialog`).css('max-width', parseCSSportalSetting(info.width,'w'));
+                    $(`#${name} .modal-dialog`).css('max-width', parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
                 }
                 $(`#${name} .modal-dialog`).css('width', t ? 'auto' : CTRIportal.width);
                 $(window).resize();
@@ -174,6 +178,9 @@ function loadPortals() {
                 $(`#${name} .iframeLoading`).hide();
                 $(this).show();
                 enableRedcapSaveButtons();
+                setTimeout( function() {
+                    $(`#${name}`).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
+                },500);
             });
             
             $(this).find('.saveButton').on('click', function() {
@@ -241,11 +248,14 @@ function customPipes( input ) {
     return input;
 }
 
-function parseCSSportalSetting( setting, hw ) {
+function parseCSSportalSetting( setting, hw, scrollable ) {
     if (!setting && hw=='h')
         return window.innerHeight*.9;
-    if (!setting && hw=='w')
-        return '800px';
+    if (!setting && hw=='w') {
+        if ( scrollable)
+            return '822px';
+        return '806px';
+    }
     if ( setting.includes('%') && hw=='h' )
         return window.innerHeight* (parseInt(setting.replace('%',''))/100);
     if ( setting.includes('%') && hw=='w' )
