@@ -67,6 +67,14 @@ $(document).ready(function () {
     
     CTRIportal.insideModal = window.self !== window.top;
     
+    if ( require_change_reason && CTRIportal.insideModal ) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Incompatible Project',
+            text: 'Project portal cannot function when using "change reasons" on the target project. Please disable this feature.',
+        });   
+    }
+    
     if (typeof Shazam == "object") { 
         let oldCallback = Shazam.beforeDisplayCallback;
         Shazam.beforeDisplayCallback = function () {
