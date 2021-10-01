@@ -1,4 +1,5 @@
 ProjectPortal.html = {};
+ProjectPortal.functions = {};
 
 ProjectPortal.html.modal = `
 <div id="modalID" class="modal pr-0" tabindex="-1" role="dialog">
