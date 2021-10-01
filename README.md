@@ -1,4 +1,4 @@
-# AudioRecorder - Redcap External Module
+# ProjectPortal - Redcap External Module
 
 ## What does it do?
 
