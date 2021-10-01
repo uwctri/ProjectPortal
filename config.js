@@ -1,11 +1,11 @@
 $(document).ready(function() {
-    console.log("Loaded CTRI portal config")
+    console.log("Loaded project portal config")
     var pid = (new URLSearchParams(window.location.search)).get('pid');
     var url = window.location.href.split('/').slice(0,5).join('/');
     var $modal = $('#external-modules-configure-modal');
     $modal.on('show.bs.modal', function() {
         // Making sure we are overriding this modules's modal only.
-        if ($(this).data('module') !== CTRIportal.modulePrefix)
+        if ($(this).data('module') !== ProjectPortal.modulePrefix)
             return;
     
         if (typeof ExternalModules.Settings.prototype.resetConfigInstancesOld === 'undefined')
@@ -14,10 +14,9 @@ $(document).ready(function() {
         ExternalModules.Settings.prototype.resetConfigInstances = function() {
             ExternalModules.Settings.prototype.resetConfigInstancesOld();
 
-            if ($modal.data('module') !== CTRIportal.modulePrefix)
+            if ($modal.data('module') !== ProjectPortal.modulePrefix)
                 return;
             
-            $modal.addClass('CTRIportalConfig');
             $modal.find("tr[field=current-pid] input").val(pid).hide();
             $modal.find(".external-modules-input-td").css('width','250px');
             $modal.find('thead').remove();
@@ -33,7 +32,7 @@ $(document).ready(function() {
                         <span id="isRedcap___${a}">${url}</span><br>`
                     ).append(
                         `<span style="float:right" id="isRepeating___${a}">&instance=[new-instance]</span><br>
-                        ${CTRIportal.helperButtons}<br>
+                        ${ProjectPortal.helperButtons}<br>
                         <span>Additional Pipes: Get a YMD formatted date with N offset using [today+N] and [today-N]</span><br>
                         <span style="margin-left:104px"> Get a YMD date with N working days offset using [work+N] </span><br>
                         <span style="margin-left:104px"> Event IDs can be piped via [eventname_arm_1] or [event-id] for the current event </span><br>
@@ -44,7 +43,6 @@ $(document).ready(function() {
             });
             
             // Default and branching logic in EMs doesn't work great at time of writing
-            
             // Hide values for redcap specific stuff
             $("input[name^=isredcap_]").on('click', function() {
                 let a = $(this).prop('name').split('____')[1];
@@ -110,12 +108,9 @@ $(document).ready(function() {
 
     $modal.on('hide.bs.modal', function() {
         // Making sure we are overriding this modules's modal only.
-        if ($(this).data('module') !== CTRIportal.modulePrefix)
+        if ($(this).data('module') !== ProjectPortal.modulePrefix)
             return;
-
         if (typeof ExternalModules.Settings.prototype.resetConfigInstancesOld !== 'undefined')
             ExternalModules.Settings.prototype.resetConfigInstances = ExternalModules.Settings.prototype.resetConfigInstancesOld;
-
-        $modal.removeClass('CTRIportalConfig');
     });
 });

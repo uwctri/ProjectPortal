@@ -1,6 +1,6 @@
-CTRIportal.html = {};
+ProjectPortal.html = {};
 
-CTRIportal.html.modal = `
+ProjectPortal.html.modal = `
 <div id="modalID" class="modal pr-0" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
@@ -27,14 +27,14 @@ CTRIportal.html.modal = `
 </div>
 `;
 
-CTRIportal.html.tr = `
-<tr id="ctriPortal-tr" sq_id="ctriPortal">
+ProjectPortal.html.tr = `
+<tr id="ProjectPortal-tr" sq_id="ProjectPortal">
     <td class="labelrc col-12" colspan="2" style="padding:0;border:0">
     </td>
 </tr>
 `;
 
-CTRIportal.html.iframe = `
+ProjectPortal.html.iframe = `
     <iframe style="display:none;width:100%;border:none" src="LINK"></iframe>
 `;
 
@@ -56,18 +56,18 @@ $.fn.isFrameScrollable = function () {
 };
 
 $(document).ready(function () {
-    $('form tr').last().after(CTRIportal.html.tr);
-    if ( CTRIportal.wrongProject ) {
+    $('form tr').last().after(ProjectPortal.html.tr);
+    if ( ProjectPortal.wrongProject ) {
         Swal.fire({
             icon: 'error',
             title: 'Old configuration for CTRI Portal!',
-            text: 'Modal links appear to have been set in a differant project. Please ask an admin to review the project settings.',
+            text: 'Modal links appear to have been set in a differant project. Please review the project settings.',
         });    
     }
     
-    CTRIportal.insideModal = window.self !== window.top;
+    ProjectPortal.insideModal = window.self !== window.top;
     
-    if ( require_change_reason && CTRIportal.insideModal ) {
+    if ( require_change_reason && ProjectPortal.insideModal ) {
         Swal.fire({
             icon: 'error',
             title: 'Incompatible Project',
@@ -80,18 +80,19 @@ $(document).ready(function () {
         Shazam.beforeDisplayCallback = function () {
             if (typeof oldCallback == "function") 
                 oldCallback();
-            loadPortals();
+            ProjectPortal.functions.loadPortals();
         }
-        setTimeout(loadPortals, 1000);
+        setTimeout(ProjectPortal.functions.loadPortals, 1000);
     }
-    else 
-        loadPortals();
+    else {
+        ProjectPortal.functions.loadPortals();
+    }
 });
 
-function loadPortals() {
-    if ( CTRIportal.loaded )
+ProjectPortal.functions.loadPortals = function() {
+    if ( ProjectPortal.loaded )
         return;
-    CTRIportal.loaded = true;
+    ProjectPortal.loaded = true;
     
     // Prevent google chrome bug with hidden forms
     $(window).bind('beforeunload', function(){
@@ -99,13 +100,13 @@ function loadPortals() {
             $( ".modal" ).remove();
     });
     
-    $.each( CTRIportal.config, function(name, info) {
+    $.each( ProjectPortal.config, function(name, info) {
         if ( $(`.${name}`).length == 0 )
             return;
         
         $(`.${name}`).off(); // Remove all Redcap events
         
-        info.url = customPipes( info.url );
+        info.url = ProjectPortal.functions.customPipes( info.url );
         
         if ( !info.modal ) {
             $(`.${name}`).attr('href', info.url);
@@ -115,11 +116,11 @@ function loadPortals() {
             return;
         }
         
-        if ( CTRIportal.insideModal ) { // Stop that pop-up from happening
+        if ( ProjectPortal.insideModal ) { // Stop that pop-up from happening
             require_change_reason = 0;  // but doesn't solve saving issue
         }
         
-        $("#ctriPortal-tr td").append(CTRIportal.html.modal.replace('modalID', name));
+        $("#ProjectPortal-tr td").append(ProjectPortal.html.modal.replace('modalID', name));
         if ( info.hideClose )
             $(`#${name} .btn-danger`).hide();
         $(`#${name}`).modal({
@@ -133,15 +134,15 @@ function loadPortals() {
         });
         
         $(`#${name}`).on('shown.bs.modal', function() {
-            if ( CTRIportal.backgroundScroll )
+            if ( ProjectPortal.backgroundScroll )
                 $(".modal-open").css("overflow-y",'auto');
         });
         
         $(`#${name}`).on('show.bs.modal', function() {
-            $(this).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w',$(this).isFrameScrollable()));
+            $(this).find('.modal-dialog').css('max-width', ProjectPortal.functions.parseCSSportalSetting(info.width,'w',$(this).isFrameScrollable()));
             $(window).on('resize', function(){
                 let t = $(`#${name} .fullscreen`).data('toggle');
-                let h = t ? window.innerHeight : parseCSSportalSetting(info.height,'h');
+                let h = t ? window.innerHeight : ProjectPortal.functions.parseCSSportalSetting(info.height,'h');
                 $(`#${name} .modal-dialog`).css('margin-top', t ? 0 : '1.75rem');
                 $(`#${name} .modal-dialog`).css('margin-bottom', t ? 0 : '1.75rem');
                 $(`#${name} .modal-content`).css('height', h);
@@ -159,17 +160,17 @@ function loadPortals() {
                 let t = $(`#${name} .fullscreen`).data('toggle');
                 $(`#${name} .fullscreen`).data('toggle', !t);
                 if ( t ) {
-                    CTRIportal.width = $(`#${name} .modal-dialog`).width()
+                    ProjectPortal.width = $(`#${name} .modal-dialog`).width()
                     if ( info.hide != 'all' )//Only change width if we aren't showing a normal form
                         $(`#${name} .modal-dialog`).css('max-width', window.innerWidth);
                 } else {
-                    $(`#${name} .modal-dialog`).css('max-width', parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
+                    $(`#${name} .modal-dialog`).css('max-width', ProjectPortal.functions.parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
                 }
-                $(`#${name} .modal-dialog`).css('width', t ? 'auto' : CTRIportal.width);
+                $(`#${name} .modal-dialog`).css('width', t ? 'auto' : ProjectPortal.width);
                 $(window).resize();
             });
             
-            $(this).find('.modal-body').append(CTRIportal.html.iframe.replace('LINK',info.url));
+            $(this).find('.modal-body').append(ProjectPortal.html.iframe.replace('LINK',info.url));
                        
             $(this).find('iframe').on('load', function() {
                 let content = $(this).contents();
@@ -185,9 +186,9 @@ function loadPortals() {
                 }
                 $(`#${name} .iframeLoading`).hide();
                 $(this).show();
-                enableRedcapSaveButtons();
+                ProjectPortal.functions.enableRedcapSaveButtons();
                 setTimeout( function() {
-                    $(`#${name}`).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
+                    $(`#${name}`).find('.modal-dialog').css('max-width', ProjectPortal.functions.parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
                 },500);
             });
             
@@ -214,7 +215,7 @@ function loadPortals() {
                     return;
                 }
                 
-                disableRedcapSaveButtons();
+                ProjectPortal.functions.disableRedcapSaveButtons();
                 $(`#${name}`).modal('hide');
                 if ( $(content).find("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').length != 0 ) {
                     $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click();
@@ -226,21 +227,21 @@ function loadPortals() {
     });
 }
 
-function enableRedcapSaveButtons() {
+ProjectPortal.functions.enableRedcapSaveButtons = function() {
     $("#__SUBMITBUTTONS__-tr button").css('pointer-events', '');
     $(".modalTempDisableSave").last().remove();
 }
 
-function disableRedcapSaveButtons() {
+ProjectPortal.functions.disableRedcapSaveButtons = function() {
     $("#__SUBMITBUTTONS__-tr button").css('pointer-events', 'none');
     if ( $(".modalTempDisableSave").length > 0 )
         $("#questiontable").after(`<div class='modalTempDisableSave d-none'></div>`)
     else
         $("#__SUBMITBUTTONS__-tr button").last().after(`<span class='text-bold text-danger modalTempDisableSave'><br>* Form saving disabled while modal is saved</span>`)
-    setTimeout(enableRedcapSaveButtons, 3000);
+    setTimeout(ProjectPortal.functions.enableRedcapSaveButtons, 3000);
 }
 
-function customPipes( input ) {
+ProjectPortal.functions.customPipes = function( input ) {
     let val;
     if ( input.includes("[today") ) {
         val = input.match(/(?:today){1}([+-]([1-9]*))+/g);
@@ -256,13 +257,13 @@ function customPipes( input ) {
     return input;
 }
 
-function parseCSSportalSetting( setting, hw, scrollable ) {
+ProjectPortal.functions.parseCSSportalSetting = function( setting, hw, scrollable ) {
     if (!setting && hw=='h')
         return window.innerHeight*.9;
     if (!setting && hw=='w') {
-        if ( scrollable)
-            return '822px';
-        return '806px';
+        if ( scrollable ) 
+            return '822px'; // pretty ok defaults
+        return '806px';     // pretty ok defaults
     }
     if ( setting.includes('%') && hw=='h' )
         return window.innerHeight* (parseInt(setting.replace('%',''))/100);

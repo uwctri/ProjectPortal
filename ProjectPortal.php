@@ -1,38 +1,29 @@
 <?php
 
-namespace UWMadison\CTRIportal;
+namespace UWMadison\ProjectPortal;
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use REDCap;
 use Piping;
 use RCView;
 
-function printToScreen($string) {
-    ?><script>console.log(<?=json_encode($string); ?>);</script><?php
-}
-
-class CTRIportal extends AbstractExternalModule {
+class ProjectPortal extends AbstractExternalModule {
     
-    private $module_prefix = 'CTRI_Portal';
-    private $module_global = 'CTRIportal';
-    private $module_name = 'CTRIportal';
-    
-    public function __construct() {
-            parent::__construct();
-    }
+    private $module_prefix = 'project_portal';
+    private $module_global = 'ProjectPortal';
     
     public function redcap_every_page_top($project_id) {
         // Custom Config page
         if (strpos(PAGE, 'ExternalModules/manager/project.php') !== false && $project_id != NULL) {
-            $this->initCTRIglobal();
+            $this->initGlobal();
             $this->passArgument('helperButtons', $this->getPipingHelperButtons());
             $this->includeJs('config.js');
         }
     }
         
     public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance) {
-        $this->initCTRIglobal();
-        $config = $this->parseConfiguration( $this->getProjectSettings(), [
+        $this->initGlobal();
+        $config = $this->parseConfiguration([
             'project' => $project_id,
             'record' => $record,
             'event' => $event_id,
@@ -42,25 +33,26 @@ class CTRIportal extends AbstractExternalModule {
         $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
         $this->passArgument('wrongProject', ($cPid!="") && ($cPid!=$project_id));
         $this->passArgument('config',$config);
-        $this->includeJs('ctriportal.js');
+        $this->includeJs('portal.js');
     }
     
-    private function initCTRIglobal() {
-        $data = array(
+    private function initGlobal() {
+        $data = json_encode([
             "modulePrefix" => $this->module_prefix,
-        );
-        echo "<script>var ".$this->module_global." = ".json_encode($data).";</script>";
+        ]);
+        echo "<script>var {$this->module_global} = {$data};</script>";
     }
     
     private function passArgument($name, $value) {
-        echo "<script>".$this->module_global.".".$name." = ".json_encode($value).";</script>";
+        echo "<script>{$this->module_global}.{$name} = ".json_encode($value).";</script>";
     }
     
     private function includeJs($path) {
-        echo '<script src="' . $this->getUrl($path) . '"></script>';
+        echo "<script src={$this->getUrl($path)}></script>";
     }
     
-    private function parseConfiguration( $settings, $common ) {
+    private function parseConfiguration( $common ) {
+        $settings = $this->getProjectSettings();
         $load = [];
         foreach( $settings['name']['value'] as $index => $name ) {
             if ( empty($name) ) {
@@ -117,7 +109,7 @@ class CTRIportal extends AbstractExternalModule {
         foreach ($buttons as $color => $btn) {
             $output .= RCView::button(array('class' => 'btn btn-xs btn-rc' . $color . ' btn-rc' . $color . '-light', 'onclick' => $btn['callback'] . '(); return false;'), $btn['contents']);
         }
-        return RCView::br() . RCView::span(array('class' => 'ctri-piping-helper'), $output);
+        return RCView::br() . RCView::span(array('class' => 'project-portal-piping-helper'), $output);
     }
 
 }
