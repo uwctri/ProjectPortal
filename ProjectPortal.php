@@ -9,7 +9,6 @@ use RCView;
 
 class ProjectPortal extends AbstractExternalModule {
     
-    private $module_prefix = 'project_portal';
     private $module_global = 'ProjectPortal';
     
     public function redcap_every_page_top($project_id) {
@@ -38,7 +37,7 @@ class ProjectPortal extends AbstractExternalModule {
     
     private function initGlobal() {
         $data = json_encode([
-            "modulePrefix" => $this->module_prefix,
+            "modulePrefix" => $this->PREFIX,
         ]);
         echo "<script>var {$this->module_global} = {$data};</script>";
     }
