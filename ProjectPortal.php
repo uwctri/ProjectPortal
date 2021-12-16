@@ -51,15 +51,16 @@ class ProjectPortal extends AbstractExternalModule {
     
     private function parseConfiguration( $common ) {
         $settings = $this->getProjectSettings();
+        $this->passArgument('all',$settings);
         $load = [];
-        foreach( $settings['name']['value'] as $index => $name ) {
+        foreach( $settings['name'] as $index => $name ) {
             if ( empty($name) ) {
                 continue;
             }
-            $url = $settings['destination']['value'][$index];
+            $url = $settings['destination'][$index];
             $url = str_replace( '[event-id]', $_GET['event_id'], $url );
             $hide = null;
-            if ( $settings['isredcap']['value'][$index] == "1" ) {
+            if ( $settings['isredcap'][$index] == "1" ) {
                 if ( Piping::containsSpecialTags( $url ) ) {
                     $url= Piping::pipeSpecialTags($url, $common['project'], $common['record'], $common['event'], $common['instance']);
                 }
@@ -71,7 +72,7 @@ class ProjectPortal extends AbstractExternalModule {
                     }
                 }
                 $url = 'https://' . $_SERVER['HTTP_HOST'] . '/redcap/redcap_v' . REDCAP_VERSION . $url;
-                if ( $settings['isrepeating']['value'][$index] == "1" ) {
+                if ( $settings['isrepeating'][$index] == "1" ) {
                     $url_components = parse_url($url);
                     parse_str($url_components['query'], $params);
                     $data = REDCap::getData( $params['pid'], 'array', $params['id']);
@@ -81,11 +82,11 @@ class ProjectPortal extends AbstractExternalModule {
             }
             $load[$name] = [
                 'url' => $url,
-                'width' => $settings['modal-width']['value'][$index],
-                'height' => $settings['modal-height']['value'][$index],
-                'modal' => $settings['inmodal']['value'][$index] == 1,
-                'hide' => $settings['redcap-hide']['value'][$index],
-                'hideClose' => $settings['hide-close-button']['value'][$index]
+                'width' => $settings['modal-width'][$index],
+                'height' => $settings['modal-height'][$index],
+                'modal' => $settings['inmodal'][$index] == 1,
+                'hide' => $settings['redcap-hide'][$index],
+                'hideClose' => $settings['hide-close-button'][$index]
             ];
         }
         return $load;
