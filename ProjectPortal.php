@@ -2,7 +2,6 @@
 
 namespace UWMadison\ProjectPortal;
 use ExternalModules\AbstractExternalModule;
-use ExternalModules\ExternalModules;
 use REDCap;
 use Piping;
 use RCView;
@@ -13,7 +12,7 @@ class ProjectPortal extends AbstractExternalModule {
     
     public function redcap_every_page_top($project_id) {
         // Custom Config page
-        if (strpos(PAGE, 'manager/project.php') !== false && $project_id != NULL) {
+        if ( $this->isPage('ExternalModules/manager/project.php') && $project_id != NULL) {
             $this->initGlobal();
             $this->passArgument('helperButtons', $this->getPipingHelperButtons());
             $this->includeJs('config.js');
@@ -37,7 +36,7 @@ class ProjectPortal extends AbstractExternalModule {
     
     private function initGlobal() {
         $data = json_encode([
-            "modulePrefix" => $this->PREFIX,
+            "modulePrefix" => $this->getPrefix(),
         ]);
         echo "<script>var {$this->module_global} = {$data};</script>";
     }

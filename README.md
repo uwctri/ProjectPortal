@@ -17,3 +17,5 @@ Configuration consists of defining a unique class name to attach to use in your 
 * You can not use the EM if you have the "change reasons" feature enabled as it causes issues with saving data in the modal
 
 * End-users with very low resolution screens may find this EM more annoying than helpful as the modal window makes their already small screen even smaller
+
+* The JS for this EM is fairly messy. No effort has been put into cleaning it up as this EM will likely not be published on the redcap em store.
