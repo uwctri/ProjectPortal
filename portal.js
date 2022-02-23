@@ -188,6 +188,7 @@ ProjectPortal.functions.loadPortals = function() {
                 $(`#${name} .iframeLoading`).hide();
                 $(this).show();
                 ProjectPortal.functions.enableRedcapSaveButtons();
+                $(content).find('input.rc-autocomplete').css('width','auto');
                 setTimeout( function() {
                     $(`#${name}`).find('.modal-dialog').css('max-width', ProjectPortal.functions.parseCSSportalSetting(info.width,'w',$(`#${name}`).isFrameScrollable()));
                 },500);
