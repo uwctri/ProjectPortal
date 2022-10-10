@@ -27,9 +27,7 @@ class ProjectPortal extends AbstractExternalModule {
             'event' => $event_id,
             'instance' => $repeat_instance,
         ]);
-        $cPid = $this->getProjectSetting('current-pid');
         $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
-        $this->passArgument('wrongProject', ($cPid!="") && ($cPid!=$project_id));
         $this->passArgument('config',$config);
         $this->includeJs('portal.js');
     }
@@ -51,7 +49,6 @@ class ProjectPortal extends AbstractExternalModule {
     
     private function parseConfiguration( $common ) {
         $settings = $this->getProjectSettings();
-        $this->passArgument('all',$settings);
         $load = [];
         foreach( $settings['name'] as $index => $name ) {
             if ( empty($name) ) {
@@ -75,8 +72,11 @@ class ProjectPortal extends AbstractExternalModule {
                 if ( $settings['isrepeating'][$index] == "1" ) {
                     $url_components = parse_url($url);
                     parse_str($url_components['query'], $params);
-                    $data = REDCap::getData( $params['pid'], 'array', $params['id']);
-                    $instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
+                    $instance = 0;
+                    if ( !empty($params['id']) ) {
+                        $data = REDCap::getData( $params['pid'], 'array', $params['id']);
+                        $instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
+                    }
                     $url = $url . '&instance='.($instance+1);
                 }
             }

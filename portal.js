@@ -58,13 +58,6 @@ $.fn.isFrameScrollable = function () {
 
 $(document).ready(function () {
     $('form tr').last().after(ProjectPortal.html.tr);
-    if ( ProjectPortal.wrongProject ) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Old configuration for CTRI Portal!',
-            text: 'Modal links appear to have been set in a differant project. Please review the project settings.',
-        });    
-    }
     
     ProjectPortal.insideModal = window.self !== window.top;
     
