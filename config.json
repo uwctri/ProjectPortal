@@ -6,25 +6,20 @@
         {
             "name": "Adam Nunez",
             "email": "Adam.Nunez@ctri.wisc.edu",
-            "institution": "UW Madison - Center for Tobacco Research and Intervention "
+            "institution": "UW Madison - Center for Tobacco Research and Intervention"
         },
         {
             "name": "Todd Hayes-Birchler",
             "email": "hayesbirchle@ctri.wisc.edu",
-            "institution": "UW Madison - Center for Tobacco Research and Intervention "
+            "institution": "UW Madison - Center for Tobacco Research and Intervention"
         }
     ],
     "permissions": [
         "redcap_every_page_top",
         "redcap_data_entry_form"
     ],
-    "framework-version": 8,
+    "framework-version": 9,
     "project-settings": [
-        {
-            "key": "current-pid",
-            "name": "Settings were set in this project",
-            "type": "text"
-        },
         {
             "key": "background-scroll",
             "name": "<b>Allow background scroll with open modal</b>",
@@ -34,8 +29,8 @@
             "key": "portal-buttons",
             "name": "<b>Portal</b>",
             "type": "sub_settings",
-            "repeatable":true,
-            "sub_settings":[
+            "repeatable": true,
+            "sub_settings": [
                 {
                     "key": "name",
                     "name": "<b>Unique modal name</b><br>Used as a the class name on your link and as the id on the modal",
@@ -110,7 +105,7 @@
                             "value": "none",
                             "name": "Don't hide anything"
                         }
-                    ] 
+                    ]
                 },
                 {
                     "key": "hide-close-button",
@@ -131,6 +126,6 @@
         }
     ],
     "compatibility": {
-        "redcap-version-min": "12.0.0"
+        "redcap-version-min": "12.0.4"
     }
 }
