@@ -64,7 +64,6 @@ class ProjectPortal extends AbstractExternalModule
             }
             $url = $settings['destination'][$index];
             $url = str_replace('[event-id]', $_GET['event_id'], $url);
-            $hide = null;
             if ($settings['isredcap'][$index] == "1") {
                 if (Piping::containsSpecialTags($url)) {
                     $url = Piping::pipeSpecialTags($url, $common['project'], $common['record'], $common['event'], $common['instance']);
