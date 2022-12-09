@@ -15,22 +15,17 @@ class ProjectPortal extends AbstractExternalModule
     public function redcap_every_page_top($project_id)
     {
         // Custom Config page
-        if ($this->isPage('ExternalModules/manager/project.php') && $project_id != NULL) {
+        if ($this->isPage('ExternalModules/manager/project.php') && $project_id) {
             $this->initGlobal();
             $this->passArgument('helperButtons', $this->getPipingHelperButtons());
             $this->includeJs('config.js');
         }
     }
 
-    public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance)
+    public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $instance)
     {
         $this->initGlobal();
-        $config = $this->parseConfiguration([
-            'project' => $project_id,
-            'record' => $record,
-            'event' => $event_id,
-            'instance' => $repeat_instance,
-        ]);
+        $config = $this->parseConfiguration($project_id, $record, $instrument, $event_id, $instance);
         $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
         $this->passArgument('config', $config);
         $this->includeJs('portal.js');
@@ -54,37 +49,44 @@ class ProjectPortal extends AbstractExternalModule
         echo "<script src={$this->getUrl($path)}></script>";
     }
 
-    private function parseConfiguration($common)
+    private function parseConfiguration($project_id, $record, $instrument, $event_id, $instance)
     {
+        global $redcap_base_url;
         $settings = $this->getProjectSettings();
         $load = [];
+
+        $labelSearch = "";
+        $fields = $this->getFieldNames($instrument);
+        foreach ($fields as $field) {
+            $labelSearch .= $this->getFieldLabel($field);
+        }
+
         foreach ($settings['name'] as $index => $name) {
-            if (empty($name)) {
-                continue;
-            }
+            if (empty($name)) continue;
+            if (strpos($labelSearch, $name) === false) continue;
             $url = $settings['destination'][$index];
-            $url = str_replace('[event-id]', $_GET['event_id'], $url);
+            $url = str_replace('[event-id]', $event_id, $url);
             if ($settings['isredcap'][$index] == "1") {
                 if (Piping::containsSpecialTags($url)) {
-                    $url = Piping::pipeSpecialTags($url, $common['project'], $common['record'], $common['event'], $common['instance']);
+                    $url = Piping::pipeSpecialTags($url, $project_id, $record, $event_id, $instance);
                 }
                 if (preg_match('/\[.*\]/', $url, $matches)) {
                     foreach ($matches as $match) {
-                        $event_id = REDCap::getEventIdFromUniqueEvent(trim($match, '[]'));
-                        if ($event_id)
-                            $url = str_replace($match, $event_id, $url);
+                        $url_event_id = REDCap::getEventIdFromUniqueEvent(trim($match, '[]'));
+                        if ($url_event_id)
+                            $url = str_replace($match, $url_event_id, $url);
                     }
                 }
-                $url = 'https://' . $_SERVER['HTTP_HOST'] . '/redcap/redcap_v' . REDCAP_VERSION . $url;
+                $url = "{$redcap_base_url}redcap_v" . REDCAP_VERSION . $url;
                 if ($settings['isrepeating'][$index] == "1") {
                     $url_components = parse_url($url);
                     parse_str($url_components['query'], $params);
-                    $instance = 0;
+                    $url_instance = 0;
                     if (!empty($params['id'])) {
                         $data = REDCap::getData($params['pid'], 'array', $params['id']);
-                        $instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
+                        $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
                     }
-                    $url = $url . '&instance=' . ($instance + 1);
+                    $url = $url . '&instance=' . ($url_instance + 1);
                 }
             }
             $load[$name] = [
@@ -102,20 +104,20 @@ class ProjectPortal extends AbstractExternalModule
     private function getPipingHelperButtons()
     {
         global $lang;
-        $buttons = array(
-            'green' => array(
+        $buttons = [
+            'green' => [
                 'callback' => 'smartVariableExplainPopup',
                 'contents' => '[<i class="fas fa-bolt fa-xs"></i>] ' . $lang['global_146'],
-            ),
-            'purple' => array(
+            ],
+            'purple' => [
                 'callback' => 'pipingExplanation',
-                'contents' => RCView::img(array('src' => APP_PATH_IMAGES . 'pipe.png')) . $lang['info_41'],
-            ),
-        );
+                'contents' => RCView::img(['src' => APP_PATH_IMAGES . 'pipe.png']) . $lang['info_41'],
+            ]
+        ];
         $output = '';
         foreach ($buttons as $color => $btn) {
-            $output .= RCView::button(array('class' => 'btn btn-xs btn-rc' . $color . ' btn-rc' . $color . '-light', 'onclick' => $btn['callback'] . '(); return false;'), $btn['contents']);
+            $output .= RCView::button(['class' => 'btn btn-xs btn-rc' . $color . ' btn-rc' . $color . '-light', 'onclick' => $btn['callback'] . '(); return false;'], $btn['contents']);
         }
-        return RCView::br() . RCView::span(array('class' => 'project-portal-piping-helper'), $output);
+        return RCView::br() . RCView::span(['class' => 'project-portal-piping-helper'], $output);
     }
 }
