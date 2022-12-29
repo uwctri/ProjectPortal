@@ -11,19 +11,18 @@ class ProjectPortal extends AbstractExternalModule
 {
     public function redcap_every_page_top($project_id)
     {
-        // Custom Config page
-        if ($this->isPage('ExternalModules/manager/project.php') && $project_id) {
-            $this->initializeJavascriptModuleObject();
-            $this->passArgument('prefix', $this->getPrefix());
-            $this->passArgument('helperButtons', $this->getPipingHelperButtons());
-            $this->includeJs('config.js');
-        }
+        if (!$this->isPage('ExternalModules/manager/project.php') || !$project_id) return;
+        $this->initializeJavascriptModuleObject();
+        $this->passArgument('prefix', $this->getPrefix());
+        $this->passArgument('helperButtons', $this->getPipingHelperButtons());
+        $this->includeJs('config.js');
     }
 
     public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $instance)
     {
-        $this->initializeJavascriptModuleObject();
         $config = $this->parseConfiguration($project_id, $record, $instrument, $event_id, $instance);
+        if (!$config) return;
+        $this->initializeJavascriptModuleObject();
         $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
         $this->passArgument('config', $config);
         $this->includeJs('portal.js');
@@ -45,6 +44,7 @@ class ProjectPortal extends AbstractExternalModule
         $settings = $this->getProjectSettings();
         $load = [];
 
+        // Compile a blob to search for class name
         $labelSearch = "";
         $fields = $this->getFieldNames($instrument);
         foreach ($fields as $field) {
@@ -52,33 +52,14 @@ class ProjectPortal extends AbstractExternalModule
         }
 
         foreach ($settings['name'] as $index => $name) {
+
+            // Bail if missing class name setting or in the field blob
             if (empty($name)) continue;
             if (strpos($labelSearch, $name) === false) continue;
+
+            // Save settings, done for normal urls
             $url = $settings['destination'][$index];
             $url = str_replace('[event-id]', $event_id, $url);
-            if ($settings['isredcap'][$index] == "1") {
-                if (Piping::containsSpecialTags($url)) {
-                    $url = Piping::pipeSpecialTags($url, $project_id, $record, $event_id, $instance);
-                }
-                if (preg_match('/\[.*\]/', $url, $matches)) {
-                    foreach ($matches as $match) {
-                        $url_event_id = REDCap::getEventIdFromUniqueEvent(trim($match, '[]'));
-                        if ($url_event_id)
-                            $url = str_replace($match, $url_event_id, $url);
-                    }
-                }
-                $url = "{$redcap_base_url}redcap_v" . REDCAP_VERSION . $url;
-                if ($settings['isrepeating'][$index] == "1") {
-                    $url_components = parse_url($url);
-                    parse_str($url_components['query'], $params);
-                    $url_instance = 0;
-                    if (!empty($params['id'])) {
-                        $data = REDCap::getData($params['pid'], 'array', $params['id']);
-                        $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
-                    }
-                    $url = $url . '&instance=' . ($url_instance + 1);
-                }
-            }
             $load[$name] = [
                 'url' => $url,
                 'width' => $settings['modal-width'][$index],
@@ -87,6 +68,31 @@ class ProjectPortal extends AbstractExternalModule
                 'hide' => $settings['redcap-hide'][$index],
                 'hideClose' => $settings['hide-close-button'][$index]
             ];
+            if ($settings['isredcap'][$index] != "1") continue;
+
+            // Perform all piping for the URL if its a redcap one
+            if (Piping::containsSpecialTags($url)) {
+                $url = Piping::pipeSpecialTags($url, $project_id, $record, $event_id, $instance);
+            }
+            if (preg_match('/\[.*\]/', $url, $matches)) {
+                foreach ($matches as $match) {
+                    $url_event_id = REDCap::getEventIdFromUniqueEvent(trim($match, '[]'));
+                    if ($url_event_id)
+                        $url = str_replace($match, $url_event_id, $url);
+                }
+            }
+            $url = "{$redcap_base_url}redcap_v" . REDCAP_VERSION . $url;
+            if ($settings['isrepeating'][$index] == "1") {
+                $url_components = parse_url($url);
+                parse_str($url_components['query'], $params);
+                $url_instance = 0;
+                if (!empty($params['id'])) {
+                    $data = REDCap::getData($params['pid'], 'array', $params['id']);
+                    $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
+                }
+                $url = $url . '&instance=' . ($url_instance + 1);
+            }
+            $load[$name]['url'] = $url;
         }
         return $load;
     }
