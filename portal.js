@@ -53,6 +53,7 @@ $.fn.isFrameScrollable = function () {
 
     const em = ExternalModules.UWMadison.ProjectPortal;
     const insideModal = window.self !== window.top;
+    let widthCache = 'auto';
     let loaded = false;
 
     $(document).ready(() => {
@@ -124,7 +125,7 @@ $.fn.isFrameScrollable = function () {
     }
 
     const showModal = (name, config) => {
-        let $modal = $(`#${name}`);
+        const $modal = $(`#${name}`);
         $modal.find('.modal-dialog').css('max-width', parseCSS(config.width, 'w', $modal.isFrameScrollable()));
         $(window).on('resize', () => {
             let t = $(`#${name} .fullscreen`).data('toggle');
@@ -141,17 +142,17 @@ $.fn.isFrameScrollable = function () {
             $(`#${name} iframe`).get(0).contentWindow.location.reload();
         });
 
-        $modal.find('.fullscreen').on('click', function () {
+        $modal.find('.fullscreen').on('click', () => {
             let t = $(`#${name} .fullscreen`).data('toggle');
             $(`#${name} .fullscreen`).data('toggle', !t);
             if (t) {
-                em.width = $(`#${name} .modal-dialog`).width();
+                widthCache = $(`#${name} .modal-dialog`).width();
                 if (config.hide != 'all')//Only change width if we aren't showing a normal form
                     $(`#${name} .modal-dialog`).css('max-width', `${window.innerWidth}px`);
             } else {
                 $(`#${name} .modal-dialog`).css('max-width', parseCSS(config.width, 'w', $(`#${name}`).isFrameScrollable()));
             }
-            $(`#${name} .modal-dialog`).css('width', t ? "auto" : em.width);
+            $(`#${name} .modal-dialog`).css('width', t ? "auto" : widthCache);
             $(window).resize();
         });
 
@@ -159,8 +160,7 @@ $.fn.isFrameScrollable = function () {
 
         $modal.find('iframe').on('load', function () {
             let content = $(this).contents();
-            if ($(content).find("#header").text() == "Server Error")
-                return;
+            if ($(content).find("#header").text() == "Server Error") return;
             if (config.hide == 'all') {
                 $(content).find('body > :not(#form)').not('.ui-dialog').hide();
                 $(content).find('#form').appendTo($(content).find('body'));

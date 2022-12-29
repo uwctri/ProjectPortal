@@ -23,7 +23,6 @@ class ProjectPortal extends AbstractExternalModule
         $config = $this->parseConfiguration($project_id, $record, $instrument, $event_id, $instance);
         if (!$config) return;
         $this->initializeJavascriptModuleObject();
-        $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
         $this->passArgument('config', $config);
         $this->includeJs('portal.js');
     }
