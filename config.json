@@ -21,11 +21,6 @@
     "framework-version": 9,
     "project-settings": [
         {
-            "key": "background-scroll",
-            "name": "<b>Allow background scroll with open modal</b>",
-            "type": "checkbox"
-        },
-        {
             "key": "portal-buttons",
             "name": "<b>Portal</b>",
             "type": "sub_settings",

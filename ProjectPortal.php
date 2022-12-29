@@ -9,14 +9,12 @@ use RCView;
 
 class ProjectPortal extends AbstractExternalModule
 {
-
-    private $module_global = 'ProjectPortal';
-
     public function redcap_every_page_top($project_id)
     {
         // Custom Config page
         if ($this->isPage('ExternalModules/manager/project.php') && $project_id) {
-            $this->initGlobal();
+            $this->initializeJavascriptModuleObject();
+            $this->passArgument('prefix', $this->getPrefix());
             $this->passArgument('helperButtons', $this->getPipingHelperButtons());
             $this->includeJs('config.js');
         }
@@ -24,24 +22,16 @@ class ProjectPortal extends AbstractExternalModule
 
     public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $instance)
     {
-        $this->initGlobal();
+        $this->initializeJavascriptModuleObject();
         $config = $this->parseConfiguration($project_id, $record, $instrument, $event_id, $instance);
         $this->passArgument('backgroundScroll', $this->getProjectSetting('background-scroll'));
         $this->passArgument('config', $config);
         $this->includeJs('portal.js');
     }
 
-    private function initGlobal()
-    {
-        $data = json_encode([
-            "modulePrefix" => $this->getPrefix(),
-        ]);
-        echo "<script>var {$this->module_global} = {$data};</script>";
-    }
-
     private function passArgument($name, $value)
     {
-        echo "<script>{$this->module_global}.{$name} = " . json_encode($value) . ";</script>";
+        echo "<script>{$this->getJavascriptModuleObjectName()}.{$name} = " . json_encode($value) . ";</script>";
     }
 
     private function includeJs($path)
