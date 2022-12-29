@@ -90,122 +90,124 @@ $.fn.isFrameScrollable = function () {
                 $(".modal").remove();
         });
 
-        $.each(em.config, function (name, info) {
+        $.each(em.config, (name, config) => {
             if ($(`.${name}`).length == 0) return;
-
             $(`.${name}`).off(); // Remove all Redcap events
+            config.url = customPipes(config.url);
 
-            info.url = customPipes(info.url);
-
-            if (!info.modal) {
-                $(`.${name}`).attr('href', info.url);
+            // Not a modal, just a boring link
+            if (!config.modal) {
+                $(`.${name}`).attr('href', config.url);
                 $(`.${name}`).on('click', function () {
                     window.location = $(this).attr('href');
                 });
                 return;
             }
 
-            if (insideModal) { // Stop that pop-up from happening
-                require_change_reason = 0;  // but doesn't solve saving issue
-            }
+            // Stop that pop-up from happening
+            if (insideModal) require_change_reason = 0;
 
+            // Insert and modify the modal HTML
             $("#ProjectPortal-tr td").append(modal.replace('modalID', name));
-            if (info.hideClose)
+            if (config.hideClose)
                 $(`#${name} .btn-danger`).hide();
             $(`#${name}`).modal({
                 show: false,
                 backdrop: 'static'
             });
 
+            // Setup our click and events
             $(`.${name}`).on('click', () => $(`#${name}`).modal('show'));
             $(`#${name}`).on('shown.bs.modal', () => $(".modal-open").css("overflow-y", 'auto'));
+            $(`#${name}`).on('show.bs.modal', () => showModal(name, config));
+        });
+    }
 
-            $(`#${name}`).on('show.bs.modal', function () {
-                $(this).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width, 'w', $(this).isFrameScrollable()));
-                $(window).on('resize', function () {
-                    let t = $(`#${name} .fullscreen`).data('toggle');
-                    let h = t ? window.innerHeight : parseCSSportalSetting(info.height, 'h');
-                    $(`#${name} .modal-dialog`).css('margin-top', t ? 0 : '1.75rem');
-                    $(`#${name} .modal-dialog`).css('margin-bottom', t ? 0 : '1.75rem');
-                    $(`#${name} .modal-content`).css('height', h);
-                });
-                $(window).resize();
+    const showModal = (name, config) => {
+        let $modal = $(`#${name}`);
+        $modal.find('.modal-dialog').css('max-width', parseCSS(config.width, 'w', $modal.isFrameScrollable()));
+        $(window).on('resize', () => {
+            let t = $(`#${name} .fullscreen`).data('toggle');
+            let h = t ? window.innerHeight : parseCSS(config.height, 'h');
+            $(`#${name} .modal-dialog`).css('margin-top', t ? 0 : '1.75rem');
+            $(`#${name} .modal-dialog`).css('margin-bottom', t ? 0 : '1.75rem');
+            $(`#${name} .modal-content`).css('height', h);
+        });
+        $(window).resize();
 
-                if ($(this).find('iframe').length != 0) return;
+        if ($modal.find('iframe').length != 0) return;
 
-                $(this).find('.refresh').on('click', function () {
-                    $(`#${name} iframe`).get(0).contentWindow.location.reload();
-                });
+        $modal.find('.refresh').on('click', function () {
+            $(`#${name} iframe`).get(0).contentWindow.location.reload();
+        });
 
-                $(this).find('.fullscreen').on('click', function () {
-                    let t = $(`#${name} .fullscreen`).data('toggle');
-                    $(`#${name} .fullscreen`).data('toggle', !t);
-                    if (t) {
-                        em.width = $(`#${name} .modal-dialog`).width();
-                        if (info.hide != 'all')//Only change width if we aren't showing a normal form
-                            $(`#${name} .modal-dialog`).css('max-width', `${window.innerWidth}px`);
-                    } else {
-                        $(`#${name} .modal-dialog`).css('max-width', parseCSSportalSetting(info.width, 'w', $(`#${name}`).isFrameScrollable()));
-                    }
-                    $(`#${name} .modal-dialog`).css('width', t ? "auto" : em.width);
-                    $(window).resize();
-                });
+        $modal.find('.fullscreen').on('click', function () {
+            let t = $(`#${name} .fullscreen`).data('toggle');
+            $(`#${name} .fullscreen`).data('toggle', !t);
+            if (t) {
+                em.width = $(`#${name} .modal-dialog`).width();
+                if (config.hide != 'all')//Only change width if we aren't showing a normal form
+                    $(`#${name} .modal-dialog`).css('max-width', `${window.innerWidth}px`);
+            } else {
+                $(`#${name} .modal-dialog`).css('max-width', parseCSS(config.width, 'w', $(`#${name}`).isFrameScrollable()));
+            }
+            $(`#${name} .modal-dialog`).css('width', t ? "auto" : em.width);
+            $(window).resize();
+        });
 
-                $(this).find('.modal-body').append(iframe.replace('LINK', info.url));
+        $modal.find('.modal-body').append(iframe.replace('LINK', config.url));
 
-                $(this).find('iframe').on('load', function () {
-                    let content = $(this).contents();
-                    if ($(content).find("#header").text() == "Server Error")
-                        return;
-                    if (info.hide == 'all') {
-                        $(content).find('body > :not(#form)').not('.ui-dialog').hide();
-                        $(content).find('#form').appendTo($(content).find('body'));
-                        $(content).find('tr[id$=__-tr]').hide();
-                        $(content).find('html').css('overflow-x', 'hidden');
-                    } else if (info.hide == 'nav') {
-                        $(content).find("#west, #south, #subheader, #fade").remove();
-                    }
-                    $(`#${name} .iframeLoading`).hide();
-                    $(this).show();
-                    enableRedcapSaveButtons();
-                    $(content).find('input.rc-autocomplete').css('width', 'auto');
-                    setTimeout(function () {
-                        $(`#${name}`).find('.modal-dialog').css('max-width', parseCSSportalSetting(info.width, 'w', $(`#${name}`).isFrameScrollable()));
-                    }, 500);
-                });
+        $modal.find('iframe').on('load', function () {
+            let content = $(this).contents();
+            if ($(content).find("#header").text() == "Server Error")
+                return;
+            if (config.hide == 'all') {
+                $(content).find('body > :not(#form)').not('.ui-dialog').hide();
+                $(content).find('#form').appendTo($(content).find('body'));
+                $(content).find('tr[id$=__-tr]').hide();
+                $(content).find('html').css('overflow-x', 'hidden');
+            } else if (config.hide == 'nav') {
+                $(content).find("#west, #south, #subheader, #fade").remove();
+            }
+            $(`#${name} .iframeLoading`).hide();
+            $(this).show();
+            enableRedcapSaveButtons();
+            $(content).find('input.rc-autocomplete').css('width', 'auto');
+            setTimeout(function () {
+                $(`#${name}`).find('.modal-dialog').css('max-width', parseCSS(config.width, 'w', $(`#${name}`).isFrameScrollable()));
+            }, 500);
+        });
 
-                $(this).find('.saveButton').on('click', function () {
-                    let content = $(`#${name} iframe`).contents();
+        $modal.find('.saveButton').on('click', function () {
+            let content = $(`#${name} iframe`).contents();
 
-                    // Check for required feilds
-                    let reqFieldMissing = false;
-                    $(content).find('*[req]:visible').each(function () {
-                        if (reqFieldMissing)
-                            return false;
-                        let $input = $(this).find('select,input,textarea');
-                        if ($input.length == 1) // Select, input, or textarea 
-                            reqFieldMissing = $input.val() == "";
-                        else // checkbox
-                            reqFieldMissing = $input.not('*[id]').get().map(x => x.value).every(x => !x);
-                    });
-                    if (reqFieldMissing) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Missing Required Fields',
-                            text: 'You did not provide a value for some fields that require a value. Please enter a value for the fields marked as required on this page.',
-                        });
-                        return;
-                    }
-
-                    disableRedcapSaveButtons();
-                    $(`#${name}`).modal('hide');
-                    if ($(content).find("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').length != 0) {
-                        $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click();
-                    } else {
-                        $(content).find("#submit-btn-savecontinue").click();
-                    }
-                });
+            // Check for required feilds
+            let reqFieldMissing = false;
+            $(content).find('*[req]:visible').each(function () {
+                if (reqFieldMissing)
+                    return false;
+                let $input = $(this).find('select,input,textarea');
+                if ($input.length == 1) // Select, input, or textarea 
+                    reqFieldMissing = $input.val() == "";
+                else // checkbox
+                    reqFieldMissing = $input.not('*[id]').get().map(x => x.value).every(x => !x);
             });
+            if (reqFieldMissing) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Missing Required Fields',
+                    text: 'You did not provide a value for some fields that require a value. Please enter a value for the fields marked as required on this page.',
+                });
+                return;
+            }
+
+            disableRedcapSaveButtons();
+            $(`#${name}`).modal('hide');
+            if ($(content).find("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').length != 0) {
+                $(`#${name} iframe`).get(0).contentWindow.jQuery("#saveButton, .saveButton").not('.modal #saveButton, .modal .saveButton').click();
+            } else {
+                $(content).find("#submit-btn-savecontinue").click();
+            }
         });
     }
 
@@ -239,7 +241,7 @@ $.fn.isFrameScrollable = function () {
         return input;
     }
 
-    const parseCSSportalSetting = (setting, hw, scrollable) => {
+    const parseCSS = (setting, hw, scrollable) => {
         if (!setting && hw == 'h')
             return window.innerHeight * .9;
         if (!setting && hw == 'w') {

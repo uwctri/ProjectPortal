@@ -1,6 +1,6 @@
 {
     "name": "Project Portal",
-    "description": "Open an iframe modal to another REDCap page or anywhere else.",
+    "description": "Open an a simple modal window to another REDCap page or anywhere else.",
     "namespace": "UWMadison\\ProjectPortal",
     "authors": [
         {
