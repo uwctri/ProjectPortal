@@ -28,7 +28,7 @@
             "sub_settings": [
                 {
                     "key": "name",
-                    "name": "<b>Unique modal name</b><br>Used as a the class name on your link and as the id on the modal",
+                    "name": "<b>Unique modal name</b><br>You must use this as a class name on your link to identify it",
                     "type": "text",
                     "required": true
                 },
@@ -109,12 +109,12 @@
                 },
                 {
                     "key": "modal-height",
-                    "name": "<b>Modal height</b><br>As percent (default of 90%) or px (600px)",
+                    "name": "<b>Modal height</b><br>As percent or px (default of 90%)",
                     "type": "text"
                 },
                 {
                     "key": "modal-width",
-                    "name": "<b>Max modal width</b><br>As percent (90%) or px (default of 800px)",
+                    "name": "<b>Max modal width</b><br>As percent or px (default of 800px)",
                     "type": "text"
                 }
             ]
