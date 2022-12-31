@@ -1,23 +1,6 @@
-Date.prototype.addDays = function (days) {
-    return new Date(this.setDate(this.getDate() + days));
-}
-
-Date.prototype.addWorkDays = function (days) {
-    return new Date(this.setDate(this.getDate() + days + (this.getDay() === 6 ? 2 : +!this.getDay()) +
-        (Math.floor((days - 1 + (this.getDay() % 6 || 1)) / 5) * 2)));
-}
-
-Date.prototype.ymd = function () {
-    return formatDate(this, 'y-MM-dd');
-}
-
-$.fn.isFrameScrollable = function () {
-    return $(this).find('iframe').contents().height() > ($(this).find('iframe').height() + 1);
-};
-
 (() => {
-    const modal = `
-    <div id="modalID" class="modal pr-0" tabindex="-1" role="dialog">
+    const modal = (id) => `
+    <div id="${id}" class="modal pr-0" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -42,14 +25,13 @@ $.fn.isFrameScrollable = function () {
         </div>
     </div>`;
 
-    const tr = `
+    const tr = () => `
     <tr id="ProjectPortal-tr" sq_id="ProjectPortal">
         <td class="labelrc col-12" colspan="2" style="padding:0;border:0">
         </td>
     </tr>`;
 
-    const iframe = `
-    <iframe style="display:none;width:100%;border:none" src="LINK"></iframe>`;
+    const iframe = (link) => `<iframe style="display:none;width:100%;border:none" src="${link}"></iframe>`;
 
     const em = ExternalModules.UWMadison.ProjectPortal;
     const insideModal = window.self !== window.top;
@@ -57,7 +39,7 @@ $.fn.isFrameScrollable = function () {
     let loaded = false;
 
     $(document).ready(() => {
-        $('form tr').last().after(tr);
+        $('form tr').last().after(tr());
 
         if (require_change_reason && insideModal) {
             Swal.fire({
@@ -109,7 +91,7 @@ $.fn.isFrameScrollable = function () {
             if (insideModal) require_change_reason = 0;
 
             // Insert and modify the modal HTML
-            $("#ProjectPortal-tr td").append(modal.replace('modalID', name));
+            $("#ProjectPortal-tr td").append(modal(name));
             if (config.hideClose)
                 $(`#${name} .btn-danger`).hide();
             $(`#${name}`).modal({
@@ -126,10 +108,10 @@ $.fn.isFrameScrollable = function () {
 
     const showModal = (name, config) => {
         const $modal = $(`#${name}`);
-        $modal.find('.modal-dialog').css('max-width', parseCSS(config.width, 'w', $modal.isFrameScrollable()));
+        $modal.find('.modal-dialog').css('max-width', parseCSS(config.width, $modal));
         $(window).on('resize', () => {
             let t = $(`#${name} .fullscreen`).data('toggle');
-            let h = t ? window.innerHeight : parseCSS(config.height, 'h');
+            let h = t ? window.innerHeight : parseCSS(config.height);
             $(`#${name} .modal-dialog`).css('margin-top', t ? 0 : '1.75rem');
             $(`#${name} .modal-dialog`).css('margin-bottom', t ? 0 : '1.75rem');
             $(`#${name} .modal-content`).css('height', h);
@@ -150,13 +132,13 @@ $.fn.isFrameScrollable = function () {
                 if (config.hide != 'all')//Only change width if we aren't showing a normal form
                     $(`#${name} .modal-dialog`).css('max-width', `${window.innerWidth}px`);
             } else {
-                $(`#${name} .modal-dialog`).css('max-width', parseCSS(config.width, 'w', $(`#${name}`).isFrameScrollable()));
+                $(`#${name} .modal-dialog`).css('max-width', parseCSS(config.width, $(`#${name}`)));
             }
             $(`#${name} .modal-dialog`).css('width', t ? "auto" : widthCache);
             $(window).resize();
         });
 
-        $modal.find('.modal-body').append(iframe.replace('LINK', config.url));
+        $modal.find('.modal-body').append(iframe(config.url));
 
         $modal.find('iframe').on('load', function () {
             let content = $(this).contents();
@@ -173,8 +155,8 @@ $.fn.isFrameScrollable = function () {
             $(this).show();
             enableRedcapSaveButtons();
             $(content).find('input.rc-autocomplete').css('width', 'auto');
-            setTimeout(function () {
-                $(`#${name}`).find('.modal-dialog').css('max-width', parseCSS(config.width, 'w', $(`#${name}`).isFrameScrollable()));
+            setTimeout(() => {
+                $(`#${name}`).find('.modal-dialog').css('max-width', parseCSS(config.width, $(`#${name}`)));
             }, 500);
         });
 
@@ -184,8 +166,7 @@ $.fn.isFrameScrollable = function () {
             // Check for required feilds
             let reqFieldMissing = false;
             $(content).find('*[req]:visible').each(function () {
-                if (reqFieldMissing)
-                    return false;
+                if (reqFieldMissing) return false;
                 let $input = $(this).find('select,input,textarea');
                 if ($input.length == 1) // Select, input, or textarea 
                     reqFieldMissing = $input.val() == "";
@@ -226,33 +207,43 @@ $.fn.isFrameScrollable = function () {
     }
 
     const customPipes = (input) => {
-        let val;
-        if (input.includes("[today")) {
-            val = input.match(/(?:today){1}([+-]([1-9]*))+/g);
-            val = parseInt((val ? val : ["today+0"])[0].split("today")[1]); // ?: isn't non-capture?
-            input = input.replace(/\[(today){1}([+-][1-9])+\]/g, (new Date()).addDays(val).ymd())
-        }
-        if (input.includes("[work")) {
-            val = input.match(/(?:work){1}([+-]([1-9]*))+/g);
-            val = parseInt((val ? val : ["work+0"])[0].split("work")[1]);
-            input = input.replace(/\[(work){1}([+-][1-9])+\]/g, (new Date()).addWorkDays(val).ymd())
-        }
-        input = input.replace("[current-url]", encodeURIComponent(window.location.href));
+        const ymd = 'y-MM-dd';
+        const config = {
+            "today": (date, days) => {
+                let result = new Date(date);
+                result.setDate(result.getDate() + days);
+                return result;
+            },
+            "work": (date, days) => {
+                let result = new Date(date);
+                result.setDate(result.getDate() + days + (result.getDay() === 6 ? 2 : +!result.getDay()) +
+                    (Math.floor((days - 1 + (result.getDay() % 6 || 1)) / 5) * 2))
+                return result;
+            }
+        };
+        input = input.replaceAll("[current-url]", encodeURIComponent(window.location.href));
+        input = input.replaceAll("[today]", formatDate(new Date(), ymd));
+        $.each(config, (pipeName, func) => {
+            if (!input.includes(`[${pipeName}`)) return;
+            let pipes = input.match(new RegExp(`(?:${pipeName}){1}([+-]([0-9]*))+`, 'g'));
+            pipes.forEach((pipe) => {
+                if (!pipe) return;
+                let number = parseInt(pipe.split(pipeName)[1]);
+                let text = formatDate(func(new Date(), number), ymd);
+                input = input.replace(`[${pipe}]`, text);
+            });
+        })
         return input;
     }
 
-    const parseCSS = (setting, hw, scrollable) => {
-        if (!setting && hw == 'h')
-            return window.innerHeight * .9;
-        if (!setting && hw == 'w') {
-            if (scrollable)
-                return '822px'; // pretty ok defaults
-            return '806px';     // pretty ok defaults
+    const parseCSS = (setting, $modalWidth) => {
+        if (!setting && $modalWidth) {
+            const scrollable = $modalWidth.find('iframe').contents().height() > ($modalWidth.find('iframe').height() + 1);
+            return scrollable ? '822px' : '806px'; // default blank Widths
         }
-        if (setting.includes('%') && hw == 'h')
-            return window.innerHeight * (parseInt(setting.replace('%', '')) / 100);
-        if (setting.includes('%') && hw == 'w')
-            return window.innerWidth * (parseInt(setting.replace('%', '')) / 100);
+        setting = setting || '90%'; // Default blank Height
+        if (setting.includes('%'))
+            return ($modalWidth ? window.innerWidth : window.innerHeight) * (parseInt(setting.replace('%', '')) / 100) + "px";
         return setting;
     }
 })();
