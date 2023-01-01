@@ -243,7 +243,7 @@
         }
         setting = setting || '90%'; // Default blank Height
         if (setting.includes('%'))
-            return ($modalWidth ? window.innerWidth : window.innerHeight) * (parseInt(setting.replace('%', '')) / 100) + "px";
+            return Math.floor(($modalWidth ? window.innerWidth : window.innerHeight) * (parseInt(setting.replace('%', '')) / 100)) + "px";
         return setting;
     }
 })();
