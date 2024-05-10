@@ -122,6 +122,6 @@
         }
     ],
     "compatibility": {
-        "redcap-version-min": "13.0.4"
+        "redcap-version-min": "13.4.0"
     }
 }

@@ -4,13 +4,13 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close fullscreen" style="font-size:1.3rem" data-toggle="false">
+                    <button type="button" class="close fullscreen" style="font-size:1.3rem" data-bs-toggle="false">
                         <span>&#x26F6;</span>
                     </button>
                     <button type="button" class="close refresh ml-0" style="font-size:1.3rem">
                         <span>&#8635;</span>
                     </button>
-                    <button type="button" class="close ml-0" data-dismiss="modal">
+                    <button type="button" class="close ml-0" data-bs-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
@@ -18,7 +18,7 @@
                     <div class="iframeLoading" style="align-self:center;color:grey;font-size:16px;">Loading...</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-success saveButton">Save & Close</button>
                 </div>
             </div>
