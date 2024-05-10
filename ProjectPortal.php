@@ -65,7 +65,8 @@ class ProjectPortal extends AbstractExternalModule
                 'height' => $settings['modal-height'][$index],
                 'modal' => $settings['inmodal'][$index] == 1,
                 'hide' => $settings['redcap-hide'][$index],
-                'hideClose' => $settings['hide-close-button'][$index]
+                'hideClose' => $settings['hide-close-button'][$index],
+                'hideSave' => $settings['hide-save-button'][$index]
             ];
             if ($settings['isredcap'][$index] != "1") continue;
 

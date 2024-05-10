@@ -63,7 +63,7 @@
         setTimeout(loadPortals, 1000);
     });
 
-    loadPortals = () => {
+    const loadPortals = () => {
         if (loaded) return;
         loaded = true;
 
@@ -94,6 +94,8 @@
             $("#ProjectPortal-tr td").append(modal(name));
             if (config.hideClose)
                 $(`#${name} .btn-danger`).hide();
+            if (config.hideSave)
+                $(`#${name} .btn-success`).hide();
             $(`#${name}`).modal({
                 show: false,
                 backdrop: 'static'

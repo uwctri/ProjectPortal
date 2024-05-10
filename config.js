@@ -2,7 +2,7 @@ $(document).ready(() => {
     console.log("Loaded project portal config")
     const prefix = ExternalModules.UWMadison.ProjectPortal.prefix;
     const helperButtons = ExternalModules.UWMadison.ProjectPortal.helperButtons;
-    const url = window.location.href.split('/').slice(0, 5).join('/');
+    const url = window.location.href.split('/ExternalModules')[0];
     const $modal = $('#external-modules-configure-modal');
     $modal.on('show.bs.modal', (el) => {
         // Making sure we are overriding our modules's modal only.
