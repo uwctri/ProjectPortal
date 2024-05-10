@@ -5,17 +5,17 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close fullscreen" style="font-size:1.3rem" data-bs-toggle="false">
-                        <span>&#x26F6</span>
+                        <span>&#x26F6;</span>
                     </button>
                     <button type="button" class="close refresh ml-0" style="font-size:1.3rem">
-                        <span>&#8635</span>
+                        <span>&#8635;</span>
                     </button>
                     <button type="button" class="close ml-0" data-bs-dismiss="modal">
-                        <span>&times</span>
+                        <span>&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" style="padding:0display:flexjustify-content:center">
-                    <div class="iframeLoading" style="align-self:centercolor:greyfont-size:16px">Loading...</div>
+                <div class="modal-body" style="padding:0;display:flex;justify-content:center;">
+                    <div class="iframeLoading" style="align-self:center;color:grey;font-size:16px;">Loading...</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
@@ -27,11 +27,11 @@
 
     const tr = () => `
     <tr id="ProjectPortal-tr" sq_id="ProjectPortal">
-        <td class="labelrc col-12" colspan="2" style="padding:0border:0">
+        <td class="labelrc col-12" colspan="2" style="padding:0;border:0">
         </td>
     </tr>`
 
-    const iframe = (link) => `<iframe style="display:nonewidth:100%border:none" src="${link}"></iframe>`
+    const iframe = (link) => `<iframe style="display:none;width:100%;border:none" src="${link}"></iframe>`
 
     const em = ExternalModules.UWMadison.ProjectPortal
     const insideModal = window.self !== window.top
