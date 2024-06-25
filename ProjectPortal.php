@@ -11,6 +11,7 @@ class ProjectPortal extends AbstractExternalModule
 {
     public function redcap_every_page_top($project_id)
     {
+        // Check if EM config page on a project, we need to customize our modal
         if (!$this->isPage('ExternalModules/manager/project.php') || !$project_id) return;
         $this->initializeJavascriptModuleObject();
         $this->passArgument('prefix', $this->getPrefix());
@@ -70,7 +71,7 @@ class ProjectPortal extends AbstractExternalModule
             ];
             if ($settings['isredcap'][$index] != "1") continue;
 
-            // Perform all piping for the URL if its a redcap one
+            // Perform all piping for the URL
             if (Piping::containsSpecialTags($url)) {
                 $url = Piping::pipeSpecialTags($url, $project_id, $record, $event_id, $instance);
             }
@@ -81,6 +82,8 @@ class ProjectPortal extends AbstractExternalModule
                         $url = str_replace($match, $url_event_id, $url);
                 }
             }
+
+            // Build out rest of URL, including instance
             $url = "{$redcap_base_url}redcap_v" . REDCAP_VERSION . $url;
             if ($settings['isrepeating'][$index] == "1") {
                 $url_components = parse_url($url);
@@ -88,10 +91,12 @@ class ProjectPortal extends AbstractExternalModule
                 $url_instance = 0;
                 if (!empty($params['id'])) {
                     $data = REDCap::getData($params['pid'], 'array', $params['id']);
-                    $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']] ?? []));
+                    $url_instance = intval(end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']] ?? [])));
                 }
                 $url = $url . '&instance=' . ($url_instance + 1);
             }
+
+            // Save the final URL
             $load[$name]['url'] = $url;
         }
         return $load;
