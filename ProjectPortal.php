@@ -88,7 +88,7 @@ class ProjectPortal extends AbstractExternalModule
                 $url_instance = 0;
                 if (!empty($params['id'])) {
                     $data = REDCap::getData($params['pid'], 'array', $params['id']);
-                    $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']]));
+                    $url_instance = (int)end(array_keys($data[$params['id']]['repeat_instances'][$params['event_id']][$params['page']] ?? []));
                 }
                 $url = $url . '&instance=' . ($url_instance + 1);
             }
