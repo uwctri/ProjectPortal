@@ -18,6 +18,7 @@ $(document).ready(() => {
             $modal.find(".external-modules-input-td").css('width', '250px')
             $modal.find('thead').remove()
             $modal.find("tr").not(".sub_start").find("span.external-modules-instance-label").remove()
+            $modal.find(".sub_start td").css("background-color", "#eeeeee")
 
             // Make URL wide
             $modal.find("tr[field=destination]").each((_, el) => {
