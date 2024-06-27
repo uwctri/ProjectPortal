@@ -6,7 +6,7 @@ ProjectPortal allows for the easy creation of modal windows to other forms in th
 
 ## Installing
 
-You can install the module from the REDCap EM repo or drop it directly in your modules folder (i.e. `redcap/modules/\project_portal_v1.0.0`) manually.
+You can install the module from the REDCap EM repo or drop it directly in your modules folder (i.e. `/modules/project_portal_v1.0.0`) manually.
 
 ## Configuration
 
