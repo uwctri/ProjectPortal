@@ -11,6 +11,7 @@ class ProjectPortal extends AbstractExternalModule
 {
     public function redcap_every_page_top($project_id)
     {
+        if (!defined("USERID")) return;
         // Check if EM config page on a project, we need to customize our modal
         if (!$this->isPage('ExternalModules/manager/project.php') || !$project_id) return;
         $this->initializeJavascriptModuleObject();
