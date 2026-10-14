@@ -143,7 +143,17 @@
         $modal.find('.modal-body').append(iframe(config.url))
 
         $modal.find('iframe').on('load', function () {
-            let content = $(this).contents()
+            let frameDocument = getFrameDocument(this)
+
+            if (!frameDocument) {
+                $(`#${name} .saveButton`).hide()
+                $(`#${name} .iframeLoading`).hide()
+                $(this).show()
+                enableRedcapSaveButtons()
+                return
+            }
+
+            let content = $(frameDocument)
             if ($(content).find("#header").text() == "Server Error") return
             if (config.hide == 'all') {
                 $(content).find('body > :not(#form)').not('.ui-dialog').hide()
@@ -155,6 +165,10 @@
             }
             $(`#${name} .iframeLoading`).hide()
             $(this).show()
+            if (config.hideSave)
+                $(`#${name} .saveButton`).hide()
+            else
+                $(`#${name} .saveButton`).show()
             enableRedcapSaveButtons()
             $(content).find('input.rc-autocomplete').css('width', 'auto')
             setTimeout(() => {
@@ -210,42 +224,50 @@
 
     const customPipes = (input) => {
         const ymd = 'y-MM-dd'
-        const config = {
-            "today": (date, days) => {
-                let result = new Date(date)
-                result.setDate(result.getDate() + days)
-                return result
-            },
-            "work": (date, days) => {
-                let result = new Date(date)
-                result.setDate(result.getDate() + days + (result.getDay() === 6 ? 2 : +!result.getDay()) +
-                    (Math.floor((days - 1 + (result.getDay() % 6 || 1)) / 5) * 2))
-                return result
-            }
-        }
         input = input.replaceAll("[current-url]", encodeURIComponent(window.location.href))
-        input = input.replaceAll("[today]", formatDate(new Date(), ymd))
-        $.each(config, (pipeName, func) => {
-            if (!input.includes(`[${pipeName}`)) return
-            let pipes = input.match(new RegExp(`(?:${pipeName}){1}([+-]([0-9]*))+`, 'g'))
-            pipes.forEach((pipe) => {
-                if (!pipe) return
-                let number = parseInt(pipe.split(pipeName)[1])
-                let text = formatDate(func(new Date(), number), ymd)
-                input = input.replace(`[${pipe}]`, text)
-            })
+        input = input.replace(/\[(today|work)([+-]\d+)?\]/g, (match, pipe, offset) => {
+            const date = new Date()
+            let days = offset ? parseInt(offset, 10) : 0
+            if (pipe === 'work') {
+                const direction = Math.sign(days)
+                while (days !== 0) {
+                    date.setDate(date.getDate() + direction)
+                    if (date.getDay() !== 0 && date.getDay() !== 6)
+                        days -= direction
+                }
+            } else {
+                date.setDate(date.getDate() + days)
+            }
+            return formatDate(date, ymd)
         })
         return input
     }
 
     const parseCSS = (setting, $modalWidth) => {
         if (!setting && $modalWidth) {
-            const scrollable = $modalWidth.find('iframe').contents().height() > ($modalWidth.find('iframe').height() + 1)
+            const iframeElement = $modalWidth.find('iframe').get(0)
+            const frameDocument = iframeElement ? getFrameDocument(iframeElement) : null
+            if (!frameDocument)
+                return '806px'
+            const scrollable = $(frameDocument).height() > ($(iframeElement).height() + 1)
             return scrollable ? '822px' : '806px' // default blank Widths
         }
         setting = setting || '90%' // Default blank Height
         if (setting.includes('%'))
             return Math.floor(($modalWidth ? window.innerWidth : window.innerHeight) * (parseInt(setting.replace('%', '')) / 100)) + "px"
         return setting
+    }
+
+    const getFrameDocument = (iframeElement) => {
+        try {
+            const frameDocument = iframeElement.contentDocument
+            if (frameDocument)
+                void frameDocument.documentElement
+            return frameDocument
+        } catch (error) {
+            if (error.name !== 'SecurityError')
+                throw error
+            return null
+        }
     }
 })()

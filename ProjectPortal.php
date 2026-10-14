@@ -31,7 +31,8 @@ class ProjectPortal extends AbstractExternalModule
 
     private function passArgument($name, $value)
     {
-        echo "<script>{$this->getJavascriptModuleObjectName()}.{$name} = " . json_encode($value) . ";</script>";
+        $json = json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        echo "<script>{$this->getJavascriptModuleObjectName()}.{$name} = {$json};</script>";
     }
 
     private function includeJs($path)
