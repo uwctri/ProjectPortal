@@ -91,7 +91,8 @@
             if (insideModal) require_change_reason = 0
 
             // Insert and modify the modal HTML
-            $("#ProjectPortal-tr td").append(modal(name))
+            $(`#${name}`).remove()
+            $('body').append(modal(name))
             if (config.hideClose)
                 $(`#${name} .btn-danger`).hide()
             if (config.hideSave)
@@ -102,7 +103,10 @@
             })
 
             // Setup our click and events
-            $(`.${name}`).on('click', () => $(`#${name}`).modal('show'))
+            $(`.${name}`).on('click', (e) => {
+                e.preventDefault()
+                $(`#${name}`).modal('show')
+            })
             $(`#${name}`).on('shown.bs.modal', () => $(".modal-open").css("overflow-y", 'auto'))
             $(`#${name}`).on('show.bs.modal', () => showModal(name, config))
         })
@@ -159,6 +163,7 @@
                 $(content).find('body > :not(#form)').not('.ui-dialog').hide()
                 $(content).find('#form').appendTo($(content).find('body'))
                 $(content).find('tr[id$=__-tr]').hide()
+                $(content).find('#fade').remove()
                 $(content).find('html').css('overflow-x', 'hidden')
             } else if (config.hide == 'nav') {
                 $(content).find("#west, #south, #subheader, #fade").remove()
@@ -177,7 +182,8 @@
         })
 
         $modal.find('.saveButton').on('click', function () {
-            let content = $(`#${name} iframe`).contents()
+            let frameDocument = getFrameDocument($(`#${name} iframe`).get(0))
+            let content = $(frameDocument)
 
             // Check for required feilds
             let reqFieldMissing = false
@@ -222,6 +228,18 @@
         setTimeout(enableRedcapSaveButtons, 3000)
     }
 
+    const formatDate = (date, format) => {
+        if (typeof window.formatDate === 'function') {
+            try {
+                return window.formatDate(date, format)
+            } catch (e) {}
+        }
+        const y = date.getFullYear()
+        const m = String(date.getMonth() + 1).padStart(2, '0')
+        const d = String(date.getDate()).padStart(2, '0')
+        return `${y}-${m}-${d}`
+    }
+
     const customPipes = (input) => {
         const ymd = 'y-MM-dd'
         input = input.replaceAll("[current-url]", encodeURIComponent(window.location.href))
@@ -252,7 +270,7 @@
             const scrollable = $(frameDocument).height() > ($(iframeElement).height() + 1)
             return scrollable ? '822px' : '806px' // default blank Widths
         }
-        setting = setting || '90%' // Default blank Height
+        setting = String(setting || '90%') // Default blank Height
         if (setting.includes('%'))
             return Math.floor(($modalWidth ? window.innerWidth : window.innerHeight) * (parseInt(setting.replace('%', '')) / 100)) + "px"
         return setting
